@@ -1,0 +1,6 @@
+{
+  "name": "QuestFit RPG: Calisthenics",
+  "description": "A premium calisthenics workout app with an anime RPG status leveling system, attributes progression, and quest rewards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
