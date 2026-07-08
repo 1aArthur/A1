@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.DailyQuest
 import com.example.data.UserStats
 import com.example.ui.WorkoutViewModel
@@ -38,8 +39,44 @@ fun DashboardScreen(
     viewModel: WorkoutViewModel,
     modifier: Modifier = Modifier
 ) {
-    val userStats by viewModel.userStats.collectAsState()
-    val dailyQuests by viewModel.dailyQuests.collectAsState()
+    val userStats by viewModel.userStats.collectAsStateWithLifecycle()
+    val dailyQuests by viewModel.dailyQuests.collectAsStateWithLifecycle()
+
+    if (userStats == null) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(VoidBackground),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    color = NeonCyan,
+                    strokeWidth = 3.dp,
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "SINCRO-SISTEMA INICIANDO...",
+                    color = NeonCyan,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    letterSpacing = 2.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Carregando atributos e dados do jogador",
+                    color = TextSecondary,
+                    fontSize = 11.sp
+                )
+            }
+        }
+        return
+    }
     
     var showInfoDialog by remember { mutableStateOf(false) }
     var questToIncrement by remember { mutableStateOf<DailyQuest?>(null) }
@@ -426,8 +463,7 @@ fun DashboardScreen(
     AnimatedVisibility(
         visible = showLevelUpAnim != null,
         enter = fadeIn() + scaleIn(initialScale = 0.5f),
-        exit = fadeOut() + scaleOut(targetScale = 1.5f),
-        modifier = Modifier.fillMaxSize()
+        exit = fadeOut() + scaleOut(targetScale = 1.5f)
     ) {
         showLevelUpAnim?.let { newLevel ->
             Box(

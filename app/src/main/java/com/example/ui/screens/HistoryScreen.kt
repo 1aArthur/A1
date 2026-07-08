@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.CompletedWorkout
 import com.example.ui.WorkoutViewModel
 import com.example.ui.components.NeonCard
@@ -38,8 +39,44 @@ fun HistoryScreen(
     viewModel: WorkoutViewModel,
     modifier: Modifier = Modifier
 ) {
-    val completedWorkouts by viewModel.completedWorkouts.collectAsState()
-    val userStats by viewModel.userStats.collectAsState()
+    val completedWorkouts by viewModel.completedWorkouts.collectAsStateWithLifecycle()
+    val userStats by viewModel.userStats.collectAsStateWithLifecycle()
+
+    if (userStats == null) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(VoidBackground),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                CircularProgressIndicator(
+                    color = NeonCyan,
+                    strokeWidth = 3.dp,
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "LENDO HISTÓRICO DE COMBATE...",
+                    color = NeonCyan,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    letterSpacing = 2.sp
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Consolidando gráficos de performance",
+                    color = TextSecondary,
+                    fontSize = 11.sp
+                )
+            }
+        }
+        return
+    }
 
     var activeSubTab by remember { mutableStateOf("HISTORICO") } // HISTORICO, ANALYTICS
 

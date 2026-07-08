@@ -1,15 +1,18 @@
 package com.example.ui.screens
 
 import android.os.CountDownTimer
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Celebration
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.Timer
@@ -52,6 +55,17 @@ fun ActiveWorkoutScreen(
     // Timer states
     var secondsElapsed by remember { mutableStateOf(0) }
     var restSecondsLeft by remember { mutableStateOf(30) }
+
+    var showExitDialog by remember { mutableStateOf(false) }
+
+    // Intercept hardware/system back button
+    BackHandler {
+        if (currentState == SessionState.SUMMARY) {
+            onBackToHome()
+        } else {
+            showExitDialog = true
+        }
+    }
 
     val currentExercise = workout.exercises.getOrNull(currentExerciseIndex)
 
@@ -129,19 +143,40 @@ fun ActiveWorkoutScreen(
                 )
             }
 
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFF1D263B))
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            ) {
-                Text(
-                    text = String.format("%02d:%02d", secondsElapsed / 60, secondsElapsed % 60),
-                    color = GoldenSun,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFF1D263B))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = String.format("%02d:%02d", secondsElapsed / 60, secondsElapsed % 60),
+                        color = GoldenSun,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Exit training session button
+                IconButton(
+                    onClick = {
+                        if (currentState == SessionState.SUMMARY) {
+                            onBackToHome()
+                        } else {
+                            showExitDialog = true
+                        }
+                    },
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = Color.Red)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Abandonar Treino"
+                    )
+                }
             }
         }
 
@@ -212,6 +247,45 @@ fun ActiveWorkoutScreen(
                 }
             }
         }
+    }
+
+    if (showExitDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false },
+            title = {
+                Text(
+                    text = "ABANDONAR CALABOUÇO?",
+                    color = Color.Red,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = "Se você abandonar o treino agora, todo o progresso atual e as recompensas acumuladas de XP e Ouro serão perdidas. Deseja mesmo sair?",
+                    color = TextPrimary
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showExitDialog = false
+                        onBackToHome()
+                    }
+                ) {
+                    Text("SIM, SAIR", color = Color.Red, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showExitDialog = false }
+                ) {
+                    Text("CONTINUAR TREINANDO", color = NeonCyan, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                }
+            },
+            containerColor = Color(0xFF161A26),
+            textContentColor = TextSecondary
+        )
     }
 }
 
